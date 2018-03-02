@@ -82,22 +82,24 @@
         var grid = e.sender;
         var record = e.record;
 
-        var s = '<a class="New_Button" href="javascript:processComplete(\'' + record.processInstanceId + '\')">办理</a>';
+        var s = '<a class="New_Button" href="javascript:processComplete(\'' + record.processInstanceId + '\',\'' + record.id + '\')">办理</a>';
 
         return s;
     }
 
-    function processComplete(processInstanceId) {
-        console.log("办理按钮" + processInstanceId)
+    function processComplete(processInstanceId, taskId) {
+        console.log("办理按钮" + processInstanceId + "  " + taskId)
+
         $.ajax({
-            url: "/processComplete",
-            data: {
-                processInstanceId: processInstanceId
-            },
-            success: function () {
-                grid.reload();
-            }
-        })
+         url: "/processComplete",
+         data: {
+         processInstanceId: processInstanceId,
+         taskId: taskId
+         },
+         success: function () {
+         grid.reload();
+         }
+         })
 
     }
 

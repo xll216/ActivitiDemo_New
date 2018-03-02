@@ -1,7 +1,11 @@
 package com.ssm.controller;
 
+import com.ssm.activiti.ApplayWorkFlow;
 import com.ssm.domain.ApplyTask;
 import com.ssm.util.BaseResult;
+import org.activiti.engine.task.Task;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +21,8 @@ import java.util.Map;
  */
 @Controller
 public class MainController {
+    @Autowired
+    private ApplayWorkFlow applayWorkFlow;
 
     @RequestMapping(value = {"", "/", "/home"})
     public String home() {
@@ -29,6 +35,9 @@ public class MainController {
     }
 
 
+    /**
+     * 任务列表数据获取
+     **/
     @ResponseBody
     @RequestMapping("/getTaskListByName")
     public BaseResult<ApplyTask> getTaskList(
@@ -39,13 +48,39 @@ public class MainController {
 
         List<ApplyTask> taskList = new ArrayList<>();
 
-        for (int i = 0; i < 5; i++) {
+        if (StringUtils.isBlank(username)) {
+            username = "张三";
+        }
+
+        //通过工作流对象获取某人名下的任务列表
+        List<Task> list = applayWorkFlow
+                .getTaskListByName(username);
+
+        for (Task t : list) {
             ApplyTask task = new ApplyTask();
-            task.setId(i + "");
-            task.setTaskName("请假申请-" + i);
-            task.setProcessInstanceId("流程实例-" + i);
-            task.setProcessDefinitionId("流程定义-" + i);
-            task.setProcessName("请假申请-" + i);
+            task.setId(t.getId());//任务id
+
+            //任务名称
+            task.setTaskName("请假申请");
+
+            //流程名称
+            task.setProcessName(t.getName());
+
+            //流程实例ID
+            task.setProcessInstanceId(
+                    t.getProcessInstanceId());
+
+            //流程定义ID
+            task.setProcessDefinitionId(
+                    t.getProcessDefinitionId());
+
+            //申请人
+            Map<String, Object> map = t
+                    .getProcessVariables();
+
+            task.setApplyName((String) map
+                    .get("applyName"));
+
             taskList.add(task);
         }
         result.setTotal(taskList.size());
@@ -54,6 +89,9 @@ public class MainController {
         return result;
     }
 
+    /**
+     * 员工提交请假申请
+     **/
     @RequestMapping("/employeeApply")
     public String employeeApply(ApplyTask applyTask) {
         Map<String, Object> map = new HashMap<>();
@@ -64,13 +102,27 @@ public class MainController {
 
         System.out.println(map);
 
+        //请假申请
+        applayWorkFlow.employeeApply(map);
+
         return "Home";
     }
 
+    /**
+     * 处理某个任务
+     **/
     @ResponseBody
     @RequestMapping("/processComplete")
-    public String processComplete(String processInstanceId) {
+    public String processComplete(
+            String processInstanceId,
+            String taskId) {
+
         System.out.println(processInstanceId);
+
+        //处理该流程
+        applayWorkFlow.processComplete(
+                processInstanceId,
+                taskId, "注意安全");
 
         return "suc";
     }
