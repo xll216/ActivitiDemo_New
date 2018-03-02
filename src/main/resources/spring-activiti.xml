@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- activiti 配置 -->
+
+    <!--创建流程引擎配置对象-->
+    <bean id="processEngineConfiguration"
+          class="org.activiti.spring.SpringProcessEngineConfiguration">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <!--建表策略-->
+        <property name="databaseSchemaUpdate" value="true"/>
+        <!--历史控制级别-->
+        <property name="history" value="full"/>
+        <!--使用spring的自动资源加载部署方式部署-->
+        <property name="deploymentResources" value="classpath*:activiti/*.bpmn"/>
+    </bean>
+
+    <!--创建流程引擎对象-->
+    <bean id="processEngine"
+          class="org.activiti.spring.ProcessEngineFactoryBean">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration"/>
+    </bean>
+
+    <!--Activiti表的用户角色组-->
+    <bean id="identityService"
+          factory-bean="processEngine"
+          factory-method="getIdentityService"/>
+
+    <bean id="formService"
+          factory-bean="processEngine"
+          factory-method="getFormService"/>
+
+    <!--流程定义和部署对象-->
+    <bean id="repositoryService"
+          factory-bean="processEngine"
+          factory-method="getRepositoryService"/>
+
+    <!--执行管理，包括流程实例和执行对象（正在执行）-->
+    <bean id="runtimeService"
+          factory-bean="processEngine"
+          factory-method="getRuntimeService"/>
+
+    <!--执行任务相关的（正在执行）-->
+    <bean id="taskService"
+          factory-bean="processEngine"
+          factory-method="getTaskService"/>
+
+    <!--历史管理-->
+    <bean id="historyService"
+          factory-bean="processEngine"
+          factory-method="getHistoryService"/>
+
+    <bean id="managementService"
+          factory-bean="processEngine"
+          factory-method="getManagementService"/>
+
+
+</beans>

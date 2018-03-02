@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.dao.UserDao">
+
+    <sql id="userColumns">
+        u.id,u.userName,u.password
+    </sql>
+
+    <sql id="usernameSql">
+        <where>
+            1 = 1
+            <if test="userName != null and userName != '' ">
+                AND u.userName = #{userName}
+            </if>
+        </where>
+    </sql>
+    <select id="selectByUserName" parameterType="String"
+            resultType="com.ssm.domain.User">
+        select
+        <include refid="userColumns"/>
+        from user u
+        where u.userName=#{userName}
+    </select>
+
+</mapper>
